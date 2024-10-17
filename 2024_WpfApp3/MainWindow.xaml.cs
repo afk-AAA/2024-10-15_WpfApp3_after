@@ -1,13 +1,7 @@
-﻿using System.Text;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace _2024_WpfApp3
 {
@@ -97,13 +91,67 @@ namespace _2024_WpfApp3
             if (rb.IsChecked == true)
             {
                 takeout = rb.Content.ToString();
-                //MessageBox.Show($"方式:{takeout}");
+                //MessageBox.Show($"方式: {takeout}");
             }
         }
-        private void OrderBotton_Click(object sender,RoutedEventArgs e)
+        
+        private void OrderButton_Click(object sender, RoutedEventArgs e)
         {
+            ResultTextBlock.Text = "";
+            string discountMessage = "";
+            //確認所有訂單的品項
             orders.Clear();
-            
+            for (int i = 0;i< stackpanel_DrinkMeun.Children.Count; i++) {
+                
+                var sp = stackpanel_DrinkMeun.Children[i] as StackPanel;
+                var cb = sp.Children[0] as CheckBox;
+                var sl = sp.Children[1] as Slider;
+                var lb = sp.Children[2] as Label;
+
+                if (cb.IsChecked == true && sl.Value >0)
+                {
+                    string drinkName = cb.Content.ToString().Split(' ')[0];   
+                    orders.Add(drinkName,int.Parse(lb.Content.ToString()));
+
+                }
+            }
+
+            //顯示訂單細項，並計算總金額
+            double total = 0.0;
+            double sellPrice = 0.0;
+
+            ResultTextBlock.Text += $"取餐方式: {takeout}\n";
+
+            int num = 1;
+            foreach (var item in orders)
+            {
+                string drinkName = item.Key;
+                int quantity = item.Value;
+                int price = drinks[drinkName];
+
+                int subTotal = price * quantity;
+                total += subTotal;
+                ResultTextBlock.Text += $"{num}. {drinkName} X {quantity}杯，共{subTotal}元\n";
+                num++;
+            }
+
+            if(total >= 500) {
+                discountMessage = "滿500元打8折";
+                sellPrice = total * 0.8;
+            }else if (total >= 300)
+            {
+                discountMessage = "滿300元打9折";
+                sellPrice = total * 0.9;
+            }
+            else
+            {
+                discountMessage = "無折扣";
+                sellPrice = total;
+            }
+
+            ResultTextBlock.Text += $"總金額:{total}元\n";
+            ResultTextBlock.Text += $"{discountMessage}，實付金額:{sellPrice}元\n";
         }
+        
     }
 }
